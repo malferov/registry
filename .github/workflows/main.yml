@@ -82,7 +82,7 @@ jobs:
           --build-arg app=$app \
           --build-arg sha=$sha \
           --build-arg ver=$ver \
-          --build-arg date="$(date --rfc-3339=seconds)" \
+          --build-arg date="$(date --rfc-3339=seconds)"
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login $registry -u $actor --password-stdin
         docker push $tag
 
