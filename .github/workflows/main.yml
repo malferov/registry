@@ -71,13 +71,15 @@ jobs:
         fi
         sha=$(git rev-parse --short HEAD^$parent)
         ver=$(git describe --tag)
-        echo "::set-env name=sha::$sha"
-        echo "::set-env name=ver::$ver"
-        echo "::set-env name=tag::$registry/${{ github.repository }}/${{ matrix.service }}:$sha"
+        echo "sha=$(git rev-parse --short HEAD^$parent)" >> $GITHUB_ENV
+        #echo "::set-env name=sha::$sha"
+        #echo "::set-env name=ver::$ver"
+        #echo "::set-env name=tag::$registry/${{ github.repository }}/${{ matrix.service }}:$sha"
         sudo pip install jinja2-cli
 
     - name: build image
       run: |
+        echo $sha
         cd src
         docker build . --tag $tag \
           --build-arg app=$app \
