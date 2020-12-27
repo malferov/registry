@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ service }}
+  labels:
+    app: {{ service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ service }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ service }}
+    spec:
+      containers:
+      - name: {{ service }}
+        image: {{ tag }}
+        env:
+        - name: GIN_MODE
+          value: release
+        ports:
+        - containerPort: {{ port }}
+      imagePullSecrets:
+      - name: regcred

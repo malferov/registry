@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+    - master
+  push:
+    tags:
+    - "*"
+
+env:
+  app: registry
+  domain: softec.pw
+  TF_VAR_app: registry
+  TF_VAR_domain: softec.pw
+  registry: docker.pkg.github.com
+  actor: ${{ github.actor }}
+
+  TF_INPUT: 0
+  TF_IN_AUTOMATION: 1
+  TF_VAR_do_token: ${{ secrets.do_token }}
+  TF_VAR_letsencrypt_url: https://acme-staging-v02.api.letsencrypt.org/directory
+  TF_VAR_email: malferov44@gmail.com
+
+  K8S_SERVER: ${{ secrets.K8S_SERVER }}
+  K8S_CAD: ${{ secrets.K8S_CAD }}
+  K8S_CSD: ${{ secrets.K8S_CSD }}
+  K8S_CKD: ${{ secrets.K8S_CKD }}
+
+jobs:
+  base:
+    runs-on: ubuntu-latest
+    if: false
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: deps
+      run: sudo pip install jinja2-cli
+
+    - name: tls and dns
+      env:
+        be_token: ${{ secrets.be_token }}
+      run: |
+        cd terraform
+        ./init.sh
+        terraform apply -auto-approve -var="ip=${{ secrets.K8S_SERVER }}"
+
+    - name: ingress
+      run: |
+        cd manifest
+        ./kubeconfig.sh
+        ./ingress.sh
+
+  build-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+        - registry
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 50
+
+    - name: set env
+      run: |
+        parent=0
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          git fetch --tags
+          parent=2
+        fi
+        sha=$(git rev-parse --short HEAD^$parent)
+        ver=$(git describe --tag)
+        echo "::set-env name=sha::$sha"
+        echo "::set-env name=ver::$ver"
+        echo "::set-env name=tag::$registry/${{ github.repository }}/${{ matrix.service }}:$sha"
+        sudo pip install jinja2-cli
+
+    - name: build image
+      run: |
+        cd src
+        docker build . --tag $tag \
+          --build-arg app=$app \
+          --build-arg sha=$sha \
+          --build-arg ver=$ver \
+          --build-arg date="$(date --rfc-3339=seconds)" \
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login $registry -u $actor --password-stdin
+        docker push $tag
+
+    - name: deploy service
+      run: |
+        cd manifest
+        ./kubeconfig.sh
+        ./service.sh ${{ matrix.service }}

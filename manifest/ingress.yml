@@ -1,0 +1,48 @@
+{% set host = app + '.' + domain %}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  tls:
+  - hosts:
+    - {{ host }}
+    secretName: tls
+  rules:
+    - host: {{ host }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: web
+            servicePort: 80
+---
+{% set api = 'api.' + host %}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  tls:
+  - hosts:
+    - {{ api }}
+    secretName: tls
+  rules:
+    - host: {{ api }}
+      http:
+        paths:
+{% for service in [
+  'whoami',
+  'ping',
+  'dns'
+  ]
+%}
+        - path: /{{ service }}/
+          backend:
+            serviceName: {{ service }}
+            servicePort: 5000
+{% endfor %}
