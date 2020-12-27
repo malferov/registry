@@ -20,9 +20,9 @@ env:
   TF_VAR_email: malferov44@gmail.com
 
   K8S_SERVER: ${{ secrets.K8S_SERVER }}
-  K8S_CAD: ${{ secrets.K8S_CAD }}
-  K8S_CSD: ${{ secrets.K8S_CSD }}
-  K8S_CKD: ${{ secrets.K8S_CKD }}
+  K8S_CA: ${{ secrets.K8S_CA }}
+  K8S_CRT: ${{ secrets.K8S_CRT }}
+  K8S_KEY: ${{ secrets.K8S_KEY }}
 
 jobs:
   base:
