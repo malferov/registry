@@ -9,12 +9,9 @@ on:
     - "*"
 
 env:
-  app: registry
-  domain: softec.pw
   TF_VAR_app: registry
   TF_VAR_domain: softec.pw
   registry: docker.pkg.github.com
-  actor: ${{ github.actor }}
 
   TF_INPUT: 0
   TF_IN_AUTOMATION: 1
@@ -79,10 +76,10 @@ jobs:
       run: |
         cd src
         docker build . --tag $tag \
-          --build-arg app=$app \
           --build-arg sha=$sha \
           --build-arg ver=$ver \
           --build-arg date="$(date --rfc-3339=seconds)"
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login $registry -u ${{ github.actor }} --password-stdin
         docker push $tag
 
     - name: deploy service
