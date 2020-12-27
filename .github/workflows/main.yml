@@ -69,7 +69,7 @@ jobs:
         sha=$(git rev-parse --short HEAD^$parent)
         echo "sha=$sha" >> $GITHUB_ENV
         echo "ver=$(git describe --tag)" >> $GITHUB_ENV
-        echo "tag=$registry/${{ github.repository }}:$sha" >> $GITHUB_ENV
+        echo "tag=$registry/${{ github.repository }}/${{ matrix.service }}:$sha" >> $GITHUB_ENV
         sudo pip install jinja2-cli
 
     - name: build image
