@@ -18,7 +18,7 @@ env:
   TF_INPUT: 0
   TF_IN_AUTOMATION: 1
   TF_VAR_do_token: ${{ secrets.do_token }}
-  TF_VAR_letsencrypt_url: https://acme-staging-v02.api.letsencrypt.org/directory
+  TF_VAR_letsencrypt_url: https://acme-v02.api.letsencrypt.org/directory
   TF_VAR_email: malferov44@gmail.com
 
   K8S_SERVER: ${{ secrets.K8S_SERVER }}
