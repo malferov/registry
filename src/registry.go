@@ -110,7 +110,7 @@ func putCompany(c *gin.Context) {
 				"error":  msg,
 			})
 		} else {
-			//c.Header("Content-Type", "application/json") // BindJSON set text/plain if error
+			c.Header("Content-Type", "application/json; charset=utf-8")
 			err := c.BindJSON(&profile)
 			if err != nil {
 				log(Info, traceId(c), "Invalid payload", err)
