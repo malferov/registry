@@ -2,9 +2,9 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ service }}
+  name: {{ app }}
   labels:
-    app: {{ service }}
+    app: {{ app }}
 spec:
   tls:
   - hosts:
@@ -16,5 +16,5 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ service }}
+            serviceName: {{ app }}
             servicePort: 5000
