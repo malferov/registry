@@ -4,3 +4,4 @@ src/registry
 *.rendered
 .terraform
 .terraform.lock.hcl
+*.json
