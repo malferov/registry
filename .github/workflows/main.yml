@@ -9,6 +9,8 @@ on:
     - "*"
 
 env:
+  app: registry
+  domain: softec.pw
   TF_VAR_app: registry
   TF_VAR_domain: softec.pw
   registry: docker.pkg.github.com
