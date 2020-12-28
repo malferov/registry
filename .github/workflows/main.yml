@@ -17,9 +17,9 @@ env:
 
   TF_INPUT: 0
   TF_IN_AUTOMATION: 1
-  TF_VAR_do_token: ${{ secrets.do_token }}
+  TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
   TF_VAR_letsencrypt_url: https://acme-v02.api.letsencrypt.org/directory
-  TF_VAR_email: malferov44@gmail.com
+  TF_VAR_email: ${{ secrets.EMAIL }}
 
   K8S_SERVER: ${{ secrets.K8S_SERVER }}
   K8S_CA: ${{ secrets.K8S_CA }}
@@ -37,7 +37,7 @@ jobs:
 
     - name: tls and dns
       env:
-        be_token: ${{ secrets.be_token }}
+        be_token: ${{ secrets.BE_TOKEN }}
       run: |
         cd terraform
         ./init.sh
