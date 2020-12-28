@@ -2,3 +2,5 @@
 img
 src/registry
 *.rendered
+.terraform
+.terraform.lock.hcl
