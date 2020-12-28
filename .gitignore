@@ -1,3 +1,4 @@
 .key
 img
 src/registry
+*.rendered
