@@ -1,0 +1,20 @@
+{% set host = app + '.' + domain %}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ app }}
+  labels:
+    app: {{ app }}
+spec:
+  tls:
+  - hosts:
+    - {{ host }}
+    secretName: tls
+  rules:
+    - host: {{ host }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ app }}
+            servicePort: 5000
