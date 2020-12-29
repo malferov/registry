@@ -85,8 +85,9 @@ func getCompany(c *gin.Context) {
 		var msg = "company name can contain only letters"
 		log(Info, traceId(c), msg, nil)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status": "validation",
-			"error":  msg,
+			"trace_id": *traceId(c),
+			"status":   "validation",
+			"error":    msg,
 		})
 	} else {
 		if company == profile.Alias {
@@ -121,8 +122,9 @@ func putCompany(c *gin.Context) {
 			var msg = "company name can contain only letters"
 			log(Info, traceId(c), msg, nil)
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "validation",
-				"error":  msg,
+				"trace_id": *traceId(c),
+				"status":   "validation",
+				"error":    msg,
 			})
 		} else {
 			c.Header("Content-Type", "application/json; charset=utf-8")
@@ -141,16 +143,21 @@ func putCompany(c *gin.Context) {
 				profile.Status = "active"
 				var sim = 0
 				if sim <= Threshold {
+					log(Info, traceId(c), "profile created", nil)
 					c.JSON(http.StatusCreated, gin.H{
+						"trace_id":   *traceId(c),
 						"alias":      company,
 						"similarity": 0,
 						"message":    "profile created",
 					})
 				} else {
+					var msg = "logo similarity has exceeded threshold"
+					log(Info, traceId(c), msg, nil)
 					c.JSON(http.StatusBadRequest, gin.H{
+						"trace_id":   *traceId(c),
 						"alias":      company,
 						"similarity": 64,
-						"error":      "logo similarity has exceeded threshold",
+						"error":      msg,
 					})
 				}
 			}
@@ -169,8 +176,9 @@ func genericValidation(c *gin.Context) bool {
 		var msg = "Content type '" + cType + "' is not supported"
 		log(Info, traceId(c), msg, nil)
 		c.JSON(http.StatusUnsupportedMediaType, gin.H{
-			"status": "validation",
-			"error":  msg,
+			"trace_id": *traceId(c),
+			"status":   "validation",
+			"error":    msg,
 		})
 		return false
 	}
