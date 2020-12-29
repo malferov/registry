@@ -12,17 +12,21 @@ import (
 type Profile struct {
 	Accounts []string `json:"accounts" binding:"required"`
 	Address  string   `json:"address" binding:"required"`
+	Alias    string
+	Id       string
 	Links    []string `json:"links" binding:"required"`
 	Logo     string   `json:"logo" binding:"required"`
 	Name     string   `json:"name" binding:"required"`
+	Status   string
 }
 
 type LogLevel string
 
 const (
-	Info  = LogLevel("Info")
-	Error = LogLevel("Error")
-	Fatal = LogLevel("Fatal")
+	Info      = LogLevel("Info")
+	Error     = LogLevel("Error")
+	Fatal     = LogLevel("Fatal")
+	Threshold = 10
 )
 
 var (
@@ -30,6 +34,7 @@ var (
 	version = "dev"
 	date    = "unknown"
 	pod     string
+	profile Profile
 )
 
 func setupRouter() *gin.Engine {
@@ -77,26 +82,36 @@ func getCompany(c *gin.Context) {
 
 	var alpha = regexp.MustCompile(`^[[:alpha:]]+$`).MatchString
 	if !alpha(company) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "company name can contain only letters"})
-	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"id":       "07652979",
-			"alias":    "tineye",
-			"name":     "TinEye Ltd",
-			"address":  "223 Queen Street East, Toronto, Ontario, Canada M5A 1S2",
-			"accounts": []string{"NL91ABNA0417164300"},
-			"links": []string{
-				"https://services.tineye.com/MatchEngine",
-				"https://services.tineye.com/developers/matchengine/what_is_matchengine",
-			},
-			"status": "active",
-			"logo":   "iVBORw0KGgoAAAANSUhEU...AASUVORK5CYII=",
+		var msg = "company name can contain only letters"
+		log(Info, traceId(c), msg, nil)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "validation",
+			"error":  msg,
 		})
+	} else {
+		if company == profile.Alias {
+			c.JSON(http.StatusOK, gin.H{
+				"accounts": profile.Accounts,
+				"address":  profile.Address,
+				"alias":    profile.Alias,
+				"id":       profile.Id,
+				"links":    profile.Links,
+				"logo":     profile.Logo,
+				"name":     profile.Name,
+				"status":   profile.Status,
+			})
+		} else {
+			log(Info, traceId(c), "company not found", nil)
+			c.JSON(http.StatusNotFound, gin.H{
+				"trace_id": *traceId(c),
+				"error":    "company not found",
+			})
+		}
 	}
 }
 
 func putCompany(c *gin.Context) {
-	var profile Profile
+	var pro Profile
 	company := c.Param("company")
 	log(Info, traceId(c), "Company: "+company, nil)
 
@@ -111,7 +126,7 @@ func putCompany(c *gin.Context) {
 			})
 		} else {
 			c.Header("Content-Type", "application/json; charset=utf-8")
-			err := c.BindJSON(&profile)
+			err := c.BindJSON(&pro)
 			if err != nil {
 				log(Info, traceId(c), "Invalid payload", err)
 				c.JSON(http.StatusBadRequest, gin.H{
@@ -120,11 +135,24 @@ func putCompany(c *gin.Context) {
 					"error":    err.Error(),
 				})
 			} else {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"alias":      company,
-					"similarity": 64,
-					"error":      "logo similarity has exceeded threshold",
-				})
+				profile = pro
+				profile.Alias = company
+				profile.Id = "07652979"
+				profile.Status = "active"
+				var sim = 0
+				if sim <= Threshold {
+					c.JSON(http.StatusCreated, gin.H{
+						"alias":      company,
+						"similarity": 0,
+						"message":    "profile created",
+					})
+				} else {
+					c.JSON(http.StatusBadRequest, gin.H{
+						"alias":      company,
+						"similarity": 64,
+						"error":      "logo similarity has exceeded threshold",
+					})
+				}
 			}
 		}
 	}
