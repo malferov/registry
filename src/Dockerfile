@@ -4,8 +4,8 @@ ARG ver
 ARG date
 WORKDIR /go/src
 COPY registry.go .
-RUN go get github.com/gin-gonic/gin
-RUN go get github.com/golang/glog
+RUN go mod init registry
+RUN go mod tidy
 RUN go build -o registry -ldflags "-X main.sha=$sha -X main.version=$ver -X 'main.date=$date'"
 
 FROM centos
